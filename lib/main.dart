@@ -1,4 +1,9 @@
+
 import 'package:flutter/material.dart';
+import 'question_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+QuestionBrain questionBrain = QuestionBrain();
 
 void main() => runApp(Quizzler());
 
@@ -25,6 +30,39 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+
+  List<Icon> scoreBoard = [];
+
+  Icon rightIcon = Icon(
+    Icons.check,
+    color: Colors.green,
+  );
+
+  Icon wrongIcon = Icon(
+    Icons.close,
+    color: Colors.red,
+  );
+
+  void processInput(bool questionAnswer) {
+    setState(() {
+      if (questionBrain.getAnswer() == questionAnswer) {
+        scoreBoard.add(rightIcon);
+      } else {
+        scoreBoard.add(wrongIcon);
+      }
+      if (scoreBoard.length == questionBrain.getQuestionsLength()) {
+        Alert(
+            context: context,
+            title: 'Finished!',
+            desc: 'You\'ve reached the end of the quiz')
+            .show();
+        scoreBoard = [];
+      } else {
+        questionBrain.nextQuestion();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +75,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                questionBrain.getQuestions(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -61,6 +99,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
+                processInput(true);
                 //The user picked true.
               },
             ),
@@ -79,11 +118,15 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
+                processInput(false);
                 //The user picked false.
               },
             ),
           ),
         ),
+        Row(
+          children: scoreBoard
+        )
         //TODO: Add a Row here as your score keeper
       ],
     );
